@@ -1,5 +1,8 @@
 import scala.xml.transform.{RewriteRule, RuleTransformer}
 import scala.xml.{Elem, Node, NodeSeq}
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
+import scala.util.Properties.envOrNone
 
 name := "akka-http-newrelic"
 organization := "com.github.leachbj"
@@ -53,3 +56,12 @@ def excludeAllDependencies: RuleTransformer =
       case _ => node
     }
   })
+
+pgpPassphrase := envOrNone("GPG_PASSPHRASE").map(_.toCharArray)
+pgpPublicRing := file("deploy/pubring.gpg")
+pgpSecretRing := file("deploy/secring.gpg")
+
+credentials ++= (for {
+  username <- Option(System.getenv().get("SONATYPE_USERNAME"))
+  password <- Option(System.getenv().get("SONATYPE_PASSWORD"))
+} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)).toSeq
