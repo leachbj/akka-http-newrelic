@@ -1,3 +1,7 @@
+import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
+import sbt.File
+import scala.util.Properties.envOrNone
 
 name := "akka-http-newrelic"
 organization := "com.github.leachbj"
@@ -35,3 +39,28 @@ pomExtra :=
     </developer>
   </developers>
 
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  ReleaseStep(action = Command.process("publishSigned", _)),
+  setNextVersion,
+  commitNextVersion,
+  ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+  pushChanges
+)
+
+pgpPassphrase := envOrNone("GPG_PASSPHRASE").map(_.toCharArray)
+pgpPublicRing := new File("deploy/pubring.gpg")
+pgpSecretRing := new File("deploy/secring.gpg")
+
+credentials ++= (for {
+  username <- Option(System.getenv().get("SONATYPE_USERNAME"))
+  password <- Option(System.getenv().get("SONATYPE_PASSWORD"))
+} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)).toSeq
