@@ -7,7 +7,7 @@ SBT="sbt ++${TRAVIS_SCALA_VERSION}"
 
 if [[ "${TRAVIS_PULL_REQUEST}" == "false" &&
       "${TRAVIS_BRANCH}" == "master" &&
-      $(cat version.sbt) =~ "-SNAPSHOT"
+      ! $(cat version.sbt) =~ "-SNAPSHOT"
 ]]; then
 PUBLISH=publish
 else
