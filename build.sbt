@@ -15,6 +15,10 @@ libraryDependencies ++= Seq(
   "com.newrelic.agent.java" % "newrelic-agent" % "3.28.0" % "provided"
 )
 
+packageOptions in(Compile, packageBin) +=
+  Package.ManifestAttributes("Weave-Classes" -> "akka.http.scaladsl.HttpExt,akka.http.impl.engine.client.PoolInterfaceActor$PoolRequest,akka.http.impl.engine.client.PoolInterfaceActor,akka.http.impl.engine.client.PoolFlow$RequestContext,akka.http.scaladsl.HttpExt\"",
+    "References-Classes" -> "akka.http.impl.engine.client.PoolInterfaceActor,akka.http.impl.engine.client.PoolInterfaceActor$PoolRequest")
+
 // disable using the Scala version in output paths and artifacts
 crossPaths := false
 

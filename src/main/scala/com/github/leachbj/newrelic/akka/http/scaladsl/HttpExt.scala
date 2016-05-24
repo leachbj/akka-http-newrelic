@@ -28,6 +28,7 @@ import akka.http.scaladsl.settings.ClientConnectionSettings
 import com.newrelic.api.agent.weaver.{Weave, Weaver}
 
 @Weave
+@Weave(originalName = "akka.http.scaladsl.HttpExt")
 class HttpExt {
   @Weave
   @SuppressWarnings(Array("UnusedMethodParameter"))
