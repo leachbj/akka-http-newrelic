@@ -15,6 +15,9 @@ libraryDependencies ++= Seq(
   "com.newrelic.agent.java" % "newrelic-agent" % "3.28.0" % "provided"
 )
 
+// disable using the Scala version in output paths and artifacts
+crossPaths := false
+
 publishMavenStyle := true
 publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
