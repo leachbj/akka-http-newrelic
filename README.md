@@ -3,7 +3,7 @@ akka-http-newrelic
 
 [![Build Status](https://travis-ci.org/leachbj/akka-http-newrelic.png?branch=master)](http://travis-ci.org/leachbj/akka-http-newrelic)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.leachb/akka-http-newrelic_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.leachbj/akka-http-newrelic_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.leachbj/akka-http-newrelic/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.leachbj/akka-http-newrelic)
 
 An extension for New Relic to provide akka-http client tracing with cross application
 tracing support.
