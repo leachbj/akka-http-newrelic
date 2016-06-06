@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016 Bernard Leach
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,12 +21,15 @@
  */
 package com.github.leachbj.newrelic.akka.http.client;
 
+import java.util.logging.Level;
+
 import akka.http.scaladsl.model.HttpRequest;
 import akka.http.scaladsl.model.HttpResponse;
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.agent.bridge.Token;
 import com.newrelic.api.agent.weaver.NewField;
 import com.newrelic.api.agent.weaver.Weave;
+import com.newrelic.api.agent.weaver.Weaver;
 import scala.concurrent.Promise;
 
 @Weave(originalName = "akka.http.impl.engine.client.PoolFlow$RequestContext")
@@ -39,4 +42,11 @@ public abstract class RequestContext {
     token = AgentBridge.getAgent().getTransaction() != null ? AgentBridge.getAgent().getTransaction().getToken() : null;
   }
 
+  public RequestContext copy(HttpRequest request, Promise<HttpResponse> promise, int retriesLeft) {
+    RequestContext newRc = Weaver.callOriginal();
+    newRc.token = token;
+    token = null;
+    AgentBridge.getAgent().getLogger().log(Level.FINER, "Copied token {0} to new instance", newRc.token);
+    return newRc;
+  }
 }

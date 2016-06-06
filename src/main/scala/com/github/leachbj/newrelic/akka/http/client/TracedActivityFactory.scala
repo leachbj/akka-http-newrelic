@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016 Bernard Leach
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,30 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.github.leachbj.newrelic.akka.http.scaladsl
+package com.github.leachbj.newrelic.akka.http.client
 
-import akka.event.LoggingAdapter
-import akka.http.scaladsl.Http.ClientLayer
-import akka.http.scaladsl.model.headers.Host
-import akka.http.scaladsl.settings.ClientConnectionSettings
-import com.newrelic.api.agent.weaver.{Weave, Weaver}
+import java.util.logging.Level
+import com.newrelic.agent.bridge.AgentBridge
+import com.newrelic.agent.bridge.TracedActivity
 
-@Weave(originalName = "akka.http.scaladsl.HttpExt")
-abstract class HttpExt {
-  @Weave
-  @SuppressWarnings(Array("UnusedMethodParameter"))
-  def clientLayer(hostHeader: Host): ClientLayer = {
-    val client = Weaver.callOriginal[ClientLayer]()
-    wrap(client)
+object TracedActivityFactory {
+  def getTracedActivity: TracedActivity = {
+    Option(AgentBridge.getAgent.getTransaction(false)).map { transaction =>
+      val tracedActivity = transaction.createAndStartTracedActivity
+      AgentBridge.getAgent.getLogger.log(Level.FINER, "PoolGateway tracedActivity {0}", tracedActivity)
+      tracedActivity
+    }.orNull
   }
-
-  @Weave
-  @SuppressWarnings(Array("UnusedMethodParameter"))
-  def clientLayer(hostHeader: Host, settings: ClientConnectionSettings, log: LoggingAdapter): ClientLayer = {
-    val client = Weaver.callOriginal[ClientLayer]()
-    wrap(client)
-  }
-
-  private def wrap(client: ClientLayer): ClientLayer = NewRelicClientLayer.metrics.atop(client)
 }
-

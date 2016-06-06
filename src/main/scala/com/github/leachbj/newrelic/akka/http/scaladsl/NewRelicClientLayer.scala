@@ -21,39 +21,15 @@
  */
 package com.github.leachbj.newrelic.akka.http.scaladsl
 
-import akka.http.scaladsl.model.headers.Host
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.scaladsl.BidiFlow
 import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler, OutHandler}
 import akka.stream.{Attributes, BidiShape, Inlet, Outlet}
-import com.newrelic.agent.bridge.external.ExternalParametersFactory
-import com.newrelic.agent.bridge.{AgentBridge, TracedActivity}
-import com.newrelic.api.agent.Trace
-import java.net.URI
-import java.util.logging.Level
+import com.newrelic.agent.bridge.{AgentBridge, Token, TracedActivity}
 
 import scala.collection.mutable
 
 object NewRelicClientLayer {
-  @Trace(async = true, leaf = true)
-  def openConnection(req: HttpRequest): Option[TracedActivity] =
-    Option(AgentBridge.getAgent.getTransaction(false)).flatMap { transaction =>
-      Option(transaction.createAndStartTracedActivity()).map { tracedActivity =>
-        tracedActivity.setAsyncThreadName("external")
-
-        val tm = tracedActivity.getTracedMethod
-        tm.setMetricName("akka", "client", "routing")
-
-        val hostName = req.header[Host].map(h => s"http://${h.host.address}:${h.port}").getOrElse(s"${req.uri.scheme}://${req.uri.authority.host}:${req.uri.authority.port}")
-        val remoteHost: URI = new URI(hostName)
-        tm.reportAsExternal(ExternalParametersFactory.createForHttp("AkkaHttpClient", new URI(hostName), "connection"))
-
-        AgentBridge.getAgent.getLogger.log(Level.INFO, s"Connecting to $remoteHost")
-
-        tracedActivity
-      }
-    }
-
   /**
     * {{{
     *        +------+
@@ -72,6 +48,8 @@ object NewRelicClientLayer {
 
     val activities: mutable.Stack[TracedActivity] = mutable.Stack()
 
+    val tokens: mutable.Stack[Token] = mutable.Stack()
+
     override def createLogic(inheritedAttributes: Attributes): GraphStageLogic =
       new GraphStageLogic(shape) {
         graph =>
@@ -79,15 +57,11 @@ object NewRelicClientLayer {
           override def onPush(): Unit = {
             val req = grab(in1)
 
-            val updatedReq = openConnection(req).map { ta =>
-              val outboundHeaders = new OutboundHttpHeaders(req)
-              ta.getTracedMethod.addOutboundRequestHeaders(outboundHeaders)
+            Option(AgentBridge.getAgent.getTransaction(false)).flatMap(t => Option(t.getToken)).foreach { token =>
+              tokens.push(token)
+            }
 
-              activities.push(ta)
-              outboundHeaders.request
-            }.getOrElse(req)
-
-            push(out1, updatedReq)
+            push(out1, req)
           }
         })
         setHandler(out1, new OutHandler {
@@ -97,10 +71,8 @@ object NewRelicClientLayer {
           override def onPush(): Unit = {
             val resp = grab(in2)
 
-            activities.headOption.foreach { ta =>
-              ta.getTracedMethod.readInboundResponseHeaders(InboundHttpHeaders(resp))
-              ta.finish()
-              activities.pop()
+            if (tokens.nonEmpty) {
+              tokens.pop().linkAndExpire()
             }
 
             push(out2, resp)
