@@ -49,15 +49,6 @@ public abstract class AkkaPoolGateway {
 		AgentBridge.getAgent().getLogger().log(Level.FINEST, "AkkaPoolGateway created");
 	}
 
-	private static TracedActivity getTracedActivity() {
-		if (AgentBridge.getAgent().getTransaction(false) != null) {
-			TracedActivity tracedActivity = AgentBridge.getAgent().getTransaction().createAndStartTracedActivity();
-			AgentBridge.getAgent().getLogger().log(Level.FINER, "PoolGateway tracedActivity {0}", tracedActivity);
-			return tracedActivity;
-		}
-		return null;
-	}
-
 	private HttpRequest updateRequest(HttpRequest request, TracedActivity tracedActivity) {
 		if (tracedActivity != null) {
 			AgentBridge.getAgent().getLogger().log(Level.FINEST, "PoolGateway for {0}", request);
