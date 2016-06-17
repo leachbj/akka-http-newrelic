@@ -60,10 +60,9 @@ abstract class AkkaPoolInterfaceActor {
           Option(arc.token).foreach { token =>
             if (token.linkAndExpire()) {
               AgentBridge.getAgent.getLogger.log(Level.FINER, s"Linked response {0}", AgentBridge.getAgent.getTransaction)
-
-              AgentBridge.getAgent.getTracedMethod.setMetricName("Akka", "PoolRequest", "completeResponse")
-              AgentBridge.getAgent.getTransaction.setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Actor", "completeResponse")
             }
+            AgentBridge.getAgent.getTracedMethod.setMetricName("Akka", "PoolRequest", "completeResponse")
+            AgentBridge.getAgent.getTransaction.setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Actor", "completeResponse")
 
             arc.token = null
           }
@@ -86,10 +85,10 @@ abstract class AkkaPoolInterfaceActor {
     Option(pr.token).foreach { token =>
       if (token.linkAndExpire()) {
         AgentBridge.getAgent.getLogger.log(Level.FINER, s"Linked request {0}", AgentBridge.getAgent.getTransaction)
-
-        AgentBridge.getAgent.getTracedMethod.setMetricName("Akka", "PoolRequest", "dispatchRequest")
-        AgentBridge.getAgent.getTransaction.setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Actor", "dispatchRequest")
       }
+
+      AgentBridge.getAgent.getTracedMethod.setMetricName("Akka", "PoolRequest", "dispatchRequest")
+      AgentBridge.getAgent.getTransaction.setTransactionName(TransactionNamePriority.FRAMEWORK_LOW, false, "Actor", "dispatchRequest")
 
       pr.token = null
     }
