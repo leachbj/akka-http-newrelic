@@ -25,7 +25,7 @@ import akka.http.scaladsl.model.HttpResponse
 import com.newrelic.api.agent.{HeaderType, InboundHeaders}
 
 case class InboundHttpHeaders(originalResponse: HttpResponse) extends InboundHeaders {
-  def getHeader(name: String): String = originalResponse.headers.find(h => h != null && h.name == name).map(_.value).orNull
+  def getHeader(name: String): String = originalResponse.headers.find(_.is(name.toLowerCase)).map(_.value).orNull
 
   def getHeaderType: HeaderType = HeaderType.HTTP
 }
