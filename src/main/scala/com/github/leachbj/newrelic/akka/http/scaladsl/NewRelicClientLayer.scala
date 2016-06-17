@@ -25,7 +25,7 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.scaladsl.BidiFlow
 import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler, OutHandler}
 import akka.stream.{Attributes, BidiShape, Inlet, Outlet}
-import com.newrelic.agent.bridge.{AgentBridge, Token, TracedActivity}
+import com.newrelic.agent.bridge.{AgentBridge, Token}
 
 import scala.collection.mutable
 
@@ -45,8 +45,6 @@ object NewRelicClientLayer {
     val in2: Inlet[HttpResponse] = Inlet("nr-resp.in")
     val out2: Outlet[HttpResponse] = Outlet("nr-resp.out")
     override val shape = BidiShape(in1, out1, in2, out2)
-
-    val activities: mutable.Stack[TracedActivity] = mutable.Stack()
 
     val tokens: mutable.Stack[Token] = mutable.Stack()
 
