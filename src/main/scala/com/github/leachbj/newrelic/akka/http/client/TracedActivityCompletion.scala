@@ -42,7 +42,7 @@ class TracedActivityCompletion(uriString: String, tracedActivity: TracedActivity
       AgentBridge.getAgent.getLogger.log(Level.FINEST, "PoolGateway failure {0}", tracedActivity)
       if (tracedActivity != null) {
         tracedActivity.getTracedMethod.reportAsExternal(ExternalParametersFactory.createForHttp("AkkaHttpClient", new URI(uriString), "sendReceiveOnFailure"))
-        tracedActivity.finish()
+        tracedActivity.finish(e)
       }
   }
 }
