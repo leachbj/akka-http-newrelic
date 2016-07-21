@@ -10,8 +10,8 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-core" % "2.4.4" % "provided",
-  "com.newrelic.agent.java" % "newrelic-api" % "3.28.0" % "provided",
-  "com.newrelic.agent.java" % "newrelic-agent" % "3.28.0" % "provided"
+  "com.newrelic.agent.java" % "newrelic-api" % "3.30.1" % "provided",
+  "com.newrelic.agent.java" % "newrelic-agent" % "3.30.1" % "provided"
 )
 
 packageOptions in(Compile, packageBin) +=
