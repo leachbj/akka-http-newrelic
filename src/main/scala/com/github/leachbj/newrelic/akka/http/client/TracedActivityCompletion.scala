@@ -35,7 +35,7 @@ class TracedActivityCompletion(uriString: String, tracedActivity: TracedActivity
     case Success(response) =>
       if (tracedActivity != null) {
         AgentBridge.getAgent.getLogger.log(Level.FINEST, "PoolGateway response {0} {1}", response, tracedActivity)
-        tracedActivity.getTracedMethod.reportAsExternal(ExternalParametersFactory.createForHttp("AkkaHttpClient", new URI(uriString), "sendReceive", new InboundHttpHeaders(response)))
+        tracedActivity.getTracedMethod.reportAsExternal(ExternalParametersFactory.createForHttp("AkkaHttpClient", new URI(uriString), "sendReceive", InboundHttpHeaders(response)))
         tracedActivity.finish()
       }
     case Failure(e) =>
