@@ -27,6 +27,7 @@ import akka.http.scaladsl.model.HttpRequest;
 import akka.http.scaladsl.model.HttpResponse;
 import com.newrelic.agent.bridge.AgentBridge;
 import com.newrelic.agent.bridge.Token;
+import com.newrelic.agent.bridge.Transaction;
 import com.newrelic.api.agent.weaver.NewField;
 import com.newrelic.api.agent.weaver.Weave;
 import com.newrelic.api.agent.weaver.Weaver;
@@ -34,19 +35,23 @@ import scala.concurrent.Promise;
 
 @Weave(originalName = "akka.http.impl.engine.client.PoolFlow$RequestContext")
 public abstract class RequestContext {
-  @NewField
-  public Token token;
+	@NewField
+	public Token token;
 
-  @SuppressWarnings("UnusedMethodParameter")
-  public RequestContext(HttpRequest request, Promise<HttpResponse> promise, int retriesLeft) {
-    token = AgentBridge.getAgent().getTransaction() != null ? AgentBridge.getAgent().getTransaction().getToken() : null;
-  }
+	@SuppressWarnings("UnusedMethodParameter")
+	public RequestContext(HttpRequest request, Promise<HttpResponse> promise, int retriesLeft) {
+		Transaction txn = AgentBridge.getAgent().getTransaction(false);
+		if (txn != null) {
+			token = txn.getToken();
+		}
+	}
 
-  public RequestContext copy(HttpRequest request, Promise<HttpResponse> promise, int retriesLeft) {
-    RequestContext newRc = Weaver.callOriginal();
-    newRc.token = token;
-    token = null;
-    AgentBridge.getAgent().getLogger().log(Level.FINER, "Copied token {0} to new instance", newRc.token);
-    return newRc;
-  }
+	@SuppressWarnings("UnusedMethodParameter")
+	public RequestContext copy(HttpRequest request, Promise<HttpResponse> promise, int retriesLeft) {
+		RequestContext newRc = Weaver.callOriginal();
+		newRc.token = token;
+		token = null;
+		AgentBridge.getAgent().getLogger().log(Level.FINER, "Copied token {0} to new instance", newRc.token);
+		return newRc;
+	}
 }
